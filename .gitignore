@@ -219,3 +219,12 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Our stuff.
+.ninja_deps
+.ninja_log
+build.ninja
+detect_cuda_compute_capabilities.cu
+detect_cuda_version.cc
+out/
+src/mnist/mnist
