@@ -3,7 +3,6 @@
 # weights at the end of training.
 
 set(examples_dir "${CMAKE_SOURCE_DIR}/extern/pytorch/examples")
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 
 option(DOWNLOAD_MNIST "Download the MNIST dataset from the internet" ON)
 if (DOWNLOAD_MNIST)
