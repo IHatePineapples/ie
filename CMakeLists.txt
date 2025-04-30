@@ -7,6 +7,8 @@ project(IE
     LANGUAGES C CXX
 )
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 find_package(Torch REQUIRED)
 
-# This is used to initialise
+add_subdirectory(src)
