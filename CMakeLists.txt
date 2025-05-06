@@ -8,6 +8,7 @@ project(IE
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 find_package(Torch REQUIRED)
 
