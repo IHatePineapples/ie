@@ -63,7 +63,7 @@ template <typename DataLoader>
 void train(size_t epoch, Net model, torch::Device device,
            DataLoader &data_loader, torch::optim::Optimizer &optimizer,
            size_t dataset_size) {
-  // model->train();
+  model->train();
   size_t batch_idx = 0;
   for (auto &batch : data_loader) {
     auto data = batch.data.to(device), targets = batch.target.to(device);
@@ -86,7 +86,7 @@ template <typename DataLoader>
 void test(Net model, torch::Device device, DataLoader &data_loader,
           size_t dataset_size) {
   torch::NoGradGuard no_grad;
-  // model->train(false);
+  model->train(false);
   double test_loss = 0;
   int32_t correct = 0;
   for (const auto &batch : data_loader) {
