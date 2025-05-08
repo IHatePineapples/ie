@@ -1,10 +1,16 @@
 // Originally from pytorch/examples:
 // https://github.com/pytorch/examples/blob/0c1654d6913f77f09c0505fb284d977d89c17c1a/cpp/mnist/mnist.cpp
+#include <ATen/ops/trace.h>
+#include <fstream>
+#include <ostream>
+#include <torch/jit.h>
+#include <torch/nn/pimpl.h>
+#include <torch/script.h>
+#include <torch/serialize.h>
 #include <torch/torch.h>
 
 #include <cstddef>
 #include <cstdio>
-#include <iostream>
 
 // Where to find the MNIST dataset.
 const char *kDataRoot = "./data";
@@ -21,8 +27,8 @@ const int64_t kNumberOfEpochs = 10;
 // After how many batches to log a new update with the loss value.
 const int64_t kLogInterval = 10;
 
-struct Net : torch::nn::Module {
-  Net()
+struct NetImpl : torch::nn::Module {
+  NetImpl()
       : conv1(torch::nn::Conv2dOptions(1, 10, /*kernel_size=*/5)),
         conv2(torch::nn::Conv2dOptions(10, 20, /*kernel_size=*/5)),
         fc1(320, 50), fc2(50, 10) {
@@ -51,16 +57,18 @@ struct Net : torch::nn::Module {
   torch::nn::Linear fc2;
 };
 
+TORCH_MODULE(Net);
+
 template <typename DataLoader>
-void train(size_t epoch, Net &model, torch::Device device,
+void train(size_t epoch, Net model, torch::Device device,
            DataLoader &data_loader, torch::optim::Optimizer &optimizer,
            size_t dataset_size) {
-  model.train();
+  // model->train();
   size_t batch_idx = 0;
   for (auto &batch : data_loader) {
     auto data = batch.data.to(device), targets = batch.target.to(device);
     optimizer.zero_grad();
-    auto output = model.forward(data);
+    auto output = model->forward(data);
     auto loss = torch::nll_loss(output, targets);
     AT_ASSERT(!std::isnan(loss.template item<float>()));
     loss.backward();
@@ -75,15 +83,15 @@ void train(size_t epoch, Net &model, torch::Device device,
 }
 
 template <typename DataLoader>
-void test(Net &model, torch::Device device, DataLoader &data_loader,
+void test(Net model, torch::Device device, DataLoader &data_loader,
           size_t dataset_size) {
   torch::NoGradGuard no_grad;
-  model.eval();
+  // model->train(false);
   double test_loss = 0;
   int32_t correct = 0;
   for (const auto &batch : data_loader) {
     auto data = batch.data.to(device), targets = batch.target.to(device);
-    auto output = model.forward(data);
+    auto output = model->forward(data);
     test_loss += torch::nll_loss(output, targets,
                                  /*weight=*/{}, torch::Reduction::Sum)
                      .template item<float>();
@@ -110,7 +118,7 @@ auto main() -> int {
   torch::Device device(device_type);
 
   Net model;
-  model.to(device);
+  model->to(device);
 
   auto train_dataset =
       torch::data::datasets::MNIST(kDataRoot)
@@ -130,11 +138,16 @@ auto main() -> int {
   auto test_loader =
       torch::data::make_data_loader(std::move(test_dataset), kTestBatchSize);
 
-  torch::optim::SGD optimizer(model.parameters(),
+  torch::optim::SGD optimizer(model->parameters(),
                               torch::optim::SGDOptions(0.01).momentum(0.5));
 
   for (size_t epoch = 1; epoch <= kNumberOfEpochs; ++epoch) {
     train(epoch, model, device, *train_loader, optimizer, train_dataset_size);
     test(model, device, *test_loader, test_dataset_size);
   }
+
+  torch::save(model, "mnist.pt");
+
+  std::cout << ">> mnist.pt" << std::endl;
+  return 0;
 }
