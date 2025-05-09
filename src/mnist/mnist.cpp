@@ -1,7 +1,5 @@
 // Originally from pytorch/examples:
 // https://github.com/pytorch/examples/blob/0c1654d6913f77f09c0505fb284d977d89c17c1a/cpp/mnist/mnist.cpp
-#include <ATen/ops/trace.h>
-#include <fstream>
 #include <ostream>
 #include <torch/jit.h>
 #include <torch/nn/pimpl.h>
