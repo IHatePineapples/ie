@@ -228,3 +228,7 @@ detect_cuda_compute_capabilities.cu
 detect_cuda_version.cc
 out/
 src/mnist/mnist
+
+*.desc
+*.pb.cc
+*.pb.h
