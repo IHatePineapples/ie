@@ -11,4 +11,4 @@ target_include_directories(onnx_proto
                            PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                            PUBLIC ${Protobuf_INCLUDE_DIRS}
                            )
-target_link_libraries(onnx_proto PUBLIC ${Protobuf_LIBRARIES} )
+target_link_libraries(onnx_proto PRIVATE ${Protobuf_LIBRARIES} absl_strings)
